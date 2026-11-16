@@ -34,6 +34,11 @@
 			<select id="volume-picker" aria-label="Selecionar volume"></select>
 		</label>
 		<button class="zoom-icon zoom-icon-in" type="button" aria-label="Ampliar página"></button>
+		<button id="fullscreen-toggle" class="fullscreen-toggle" type="button" aria-label="Maximizar leitor">
+			<span class="fullscreen-icon" aria-hidden="true">⛶</span>
+			<span class="fullscreen-label">Tela cheia</span>
+		</button>
+		<span id="fullscreen-status" class="fullscreen-status" role="status" hidden></span>
 	</header>
 
 	<div id="canvas" class="reader-canvas">
@@ -56,6 +61,7 @@
 				<div id="slider"></div>
 			</div>
 		</div>
+		<button id="fullscreen-exit" class="fullscreen-exit" type="button" aria-label="Sair da tela cheia" hidden>✕</button>
 
 		<script type="text/javascript">
 
@@ -257,7 +263,8 @@
 
 							break;
 						case esc:
-
+							if (getFullscreenElement())
+								break;
 							$('.magazine-viewport').zoom('zoomOut');
 							e.preventDefault();
 
@@ -422,6 +429,12 @@
 			});
 
 			$('#canvas').hide();
+			document.getElementById('fullscreen-toggle').addEventListener('click', toggleFullscreen);
+			document.getElementById('fullscreen-exit').addEventListener('click', toggleFullscreen);
+			document.addEventListener('fullscreenchange', syncFullscreenUi);
+			document.addEventListener('webkitfullscreenchange', syncFullscreenUi);
+			document.addEventListener('mozfullscreenchange', syncFullscreenUi);
+			document.addEventListener('MSFullscreenChange', syncFullscreenUi);
 
 
 			// Load the HTML4 version if there's not CSS transform
@@ -534,6 +547,62 @@
 				$('#canvas').hide();
 				document.getElementById('library').hidden = false;
 				document.body.classList.add('library-mode');
+			}
+
+			function getFullscreenElement() {
+				return document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+			}
+
+			function toggleFullscreen() {
+				var status = document.getElementById('fullscreen-status');
+				if (getFullscreenElement()) {
+					var exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+					if (exit) {
+						var exitResult = exit.call(document);
+						if (exitResult && exitResult.catch)
+							exitResult.catch(function () { status.textContent = 'Não foi possível sair da tela cheia.'; status.hidden = false; });
+					}
+					return;
+				}
+
+				var root = document.documentElement;
+				var request = root.requestFullscreen || root.webkitRequestFullscreen || root.mozRequestFullScreen || root.msRequestFullscreen;
+				if (!request) {
+					status.textContent = 'Este navegador não oferece tela cheia para páginas.';
+					status.hidden = false;
+					return;
+				}
+
+				status.textContent = '';
+				status.hidden = true;
+				try {
+					var requestResult = request.call(root);
+					if (requestResult && requestResult.catch)
+						requestResult.catch(function () {
+							status.textContent = 'O navegador não permitiu ativar a tela cheia.';
+							status.hidden = false;
+						});
+				} catch (error) {
+					status.textContent = 'O navegador não permitiu ativar a tela cheia.';
+					status.hidden = false;
+				}
+			}
+
+			function syncFullscreenUi() {
+				var active = !!getFullscreenElement();
+				var readerIsOpen = document.getElementById('library').hidden;
+				document.body.classList.toggle('fullscreen-reading', active);
+				document.getElementById('reader-controls').hidden = active || !readerIsOpen;
+				document.getElementById('fullscreen-exit').hidden = !active;
+				var toggle = document.getElementById('fullscreen-toggle');
+				toggle.setAttribute('aria-label', active ? 'Sair da tela cheia' : 'Maximizar leitor');
+				var label = toggle.querySelector('.fullscreen-label');
+				if (label)
+					label.textContent = active ? 'Sair da tela cheia' : 'Tela cheia';
+				window.setTimeout(function () {
+					if (typeof resizeViewport === 'function' && $('.magazine').turn('is'))
+						resizeViewport();
+				}, 0);
 			}
 
 		</script>

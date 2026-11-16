@@ -56,7 +56,10 @@ async function generateManifest() {
 		const title = volumeNumber
 			? 'Death Note — Volume ' + String(Number(volumeNumber[1])).padStart(2, '0')
 			: folder.name;
-		const relativePath = filePath => path.relative(projectRoot, filePath).split(path.sep).join('/');
+		const relativePath = filePath => path.relative(projectRoot, filePath)
+			.split(path.sep)
+			.map(segment => segment.normalize('NFC'))
+			.join('/');
 
 		catalog.push({
 			id: folder.name,

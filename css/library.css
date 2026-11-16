@@ -179,6 +179,41 @@ body.library-mode {
 	background-color: transparent;
 }
 
+.fullscreen-toggle {
+	display: inline-flex;
+	min-height: 34px;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	padding: 6px 10px;
+	border: 1px solid #615e5a;
+	border-radius: 6px;
+	background: #292827;
+	color: #fff;
+	font: inherit;
+	font-size: 12px;
+	white-space: nowrap;
+	cursor: pointer;
+}
+
+.fullscreen-toggle:hover,
+.fullscreen-toggle:focus-visible {
+	border-color: #a7a19a;
+	background: #393735;
+	outline: none;
+}
+
+.fullscreen-icon {
+	display: none;
+	font-size: 20px;
+	line-height: 1;
+}
+
+.fullscreen-status {
+	color: #ffd5c8;
+	font-size: 11px;
+}
+
 .volume-picker {
 	display: flex;
 	align-items: center;
@@ -220,6 +255,32 @@ body.library-mode {
 	width: min(600px, 80vw);
 }
 
+.fullscreen-exit {
+	position: absolute;
+	top: 12px;
+	right: 12px;
+	z-index: 40;
+	width: 44px;
+	height: 44px;
+	border: 1px solid rgba(255, 255, 255, .38);
+	border-radius: 50%;
+	background: rgba(24, 24, 24, .72);
+	color: #fff;
+	font-size: 21px;
+	cursor: pointer;
+}
+
+.fullscreen-exit:hover,
+.fullscreen-exit:focus-visible {
+	background: rgba(24, 24, 24, .95);
+	outline: 2px solid #fff;
+	outline-offset: 2px;
+}
+
+.fullscreen-exit[hidden] {
+	display: none;
+}
+
 .magazine .page img.manga-page {
 	display: block;
 	width: 100%;
@@ -253,11 +314,11 @@ body.library-mode {
 
 	.reader-controls {
 		gap: 8px;
-		padding: 7px 10px;
+		padding: 7px 8px;
 	}
 
 	.reader-heading strong {
-		max-width: 30vw;
+		max-width: 24vw;
 	}
 
 	.reader-canvas {
@@ -266,7 +327,20 @@ body.library-mode {
 
 	.back-button {
 		padding: 8px 2px;
-		font-size: 12px;
+		font-size: 11px;
+	}
+
+	.fullscreen-toggle {
+		min-width: 32px;
+		padding: 4px 6px;
+	}
+
+	.fullscreen-icon {
+		display: inline;
+	}
+
+	.fullscreen-label {
+		display: none;
 	}
 
 	.volume-picker > span {
@@ -276,4 +350,12 @@ body.library-mode {
 	.volume-picker select {
 		max-width: 130px;
 	}
+}
+
+body.fullscreen-reading .reader-canvas {
+	inset: 0;
+}
+
+body.fullscreen-reading .reader-canvas > .bottom {
+	background: rgba(24, 24, 24, .08);
 }
