@@ -15,7 +15,7 @@
 <body class="library-mode">
 	<main id="library" class="library" aria-labelledby="library-title">
 		<header class="library-header">
-			<p class="eyebrow">Leitor de mangá</p>
+			<p class="eyebrow">Leitor de mangá - do papai Vando para minha princesa Alice</p>
 			<h1 id="library-title">Death Note</h1>
 			<p>Escolha um volume para começar a leitura.</p>
 		</header>
@@ -438,7 +438,7 @@
 				fetch('manga-manifest.json')
 					.then(function (response) {
 						if (!response.ok)
-						throw new Error('Não foi possível carregar o catálogo estático.');
+							throw new Error('Não foi possível carregar o catálogo estático.');
 						return response.json();
 					})
 					.then(function (volumes) {
