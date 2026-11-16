@@ -33,11 +33,10 @@
 			<span>Volume</span>
 			<select id="volume-picker" aria-label="Selecionar volume"></select>
 		</label>
+		<button class="zoom-icon zoom-icon-in" type="button" aria-label="Ampliar página"></button>
 	</header>
 
 	<div id="canvas" class="reader-canvas">
-
-		<div class="zoom-icon zoom-icon-in"></div>
 
 		<div class="magazine-viewport">
 			<div class="container">
@@ -51,10 +50,10 @@
 
 				<div class="atividade" style="display: none;"></div>
 			</div>
-			<div class="bottom">
-				<div id="slider-bar" class="turnjs-slider">
-					<div id="slider"></div>
-				</div>
+		</div>
+		<div class="bottom">
+			<div id="slider-bar" class="turnjs-slider">
+				<div id="slider"></div>
 			</div>
 		</div>
 
@@ -131,7 +130,7 @@
 							$('#slider').slider('value', getViewNumber($(this), page));
 							$('#page-counter').text('Página ' + page + ' de ' + window.currentManga.pages.length);
 
-							if (page == 1) {
+							if (page == 1 && $(this).turn('display') === 'double') {
 								$(this).turn('peel', 'br');
 							}
 
@@ -380,7 +379,11 @@
 						if (window._thumbPreview)
 							_thumbPreview.removeClass('show');
 
-						$('.magazine').turn('page', Math.max(1, $(this).slider('value') * 2 - 2));
+						var book = $('.magazine');
+						var selectedPage = book.turn('display') === 'single'
+							? $(this).slider('value')
+							: $(this).slider('value') * 2 - 2;
+						book.turn('page', Math.max(1, selectedPage));
 
 					}
 				});
@@ -432,15 +435,15 @@
 			});
 
 			function initializeLibrary() {
-				fetch('/api/manga')
+				fetch('manga-manifest.json')
 					.then(function (response) {
 						if (!response.ok)
-							throw new Error('Não foi possível carregar o catálogo.');
+						throw new Error('Não foi possível carregar o catálogo estático.');
 						return response.json();
 					})
 					.then(function (volumes) {
 						if (!volumes.length) {
-							$('#library-status').text('Nenhum volume com imagens foi encontrado na pasta deathNote-manga.');
+							$('#library-status').text('Nenhum volume foi encontrado no catálogo.');
 							return;
 						}
 
@@ -487,12 +490,12 @@
 						$('#back-to-library').on('click', showLibrary);
 					})
 					.catch(function (error) {
-						$('#library-status').text(error.message + ' Inicie o leitor pelo servidor local: npm start.');
+						$('#library-status').text(error.message + ' Abra o site publicado pelo GitHub Pages.');
 					});
 			}
 
 			function toAssetUrl(relativePath) {
-				return '/' + relativePath.split('/').map(encodeURIComponent).join('/');
+				return relativePath.split('/').map(encodeURIComponent).join('/');
 			}
 
 			function openManga(volume) {
@@ -513,10 +516,14 @@
 
 				if ($('.magazine-viewport').zoom('value') !== 1)
 					$('.magazine-viewport').zoom('zoomOut');
+				book.turn('stop');
 				book.turn('page', 1);
-				book.turn('removePage', '*');
 				book.turn('pages', volume.pageCount);
-				book.turn('page', 1);
+				var loadedPages = book.data().pageObjs;
+				for (var page in loadedPages) {
+					if (Object.prototype.hasOwnProperty.call(loadedPages, page) && Number(page) > 0 && Number(page) <= volume.pageCount)
+						loadPage(Number(page), $(loadedPages[page]));
+				}
 				$('#slider').slider('option', 'max', numberOfViews(book));
 				$('#slider').slider('value', 1);
 				Hash.go('page/1').update();

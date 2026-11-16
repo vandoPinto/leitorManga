@@ -78,7 +78,7 @@ function addPage(page, book) {
 
 function loadPage(page, pageElement) {
 
-	pageElement.find('.loader').remove();
+	pageElement.empty();
 	var relativePath = window.currentManga && window.currentManga.pages[page - 1];
 
 	if (!relativePath) {
@@ -92,7 +92,6 @@ function loadPage(page, pageElement) {
 	});
 
 	image.on('error', function () {
-		pageElement.find('.loader').remove();
 		pageElement.text('Não foi possível carregar esta página.');
 	});
 
@@ -286,11 +285,12 @@ function disableControls(page) {
 function resizeViewport() {
 
 	var viewport = $('.magazine-viewport'),
-		width = viewport.width() || $(window).width(),
-		height = viewport.height() || $(window).height(),
+		canvas = $('#canvas'),
+		width = canvas.width() || $(window).width(),
+		height = Math.max(1, (canvas.height() || $(window).height()) - 24),
 		book = $('.magazine'),
 		options = book.turn('options'),
-		display = width <= 900 ? 'single' : 'double';
+		display = $.isTouch || width <= 900 ? 'single' : 'double';
 
 	if (book.turn('display') !== display)
 		book.turn('display', display);
@@ -349,6 +349,11 @@ function resizeViewport() {
 	else
 		$('.made').show();
 
+	if ($('#slider').hasClass('ui-slider')) {
+		$('#slider').slider('option', 'max', numberOfViews(book));
+		$('#slider').slider('value', getViewNumber(book));
+	}
+
 	book.addClass('animated');
 
 }
@@ -357,13 +362,14 @@ function resizeViewport() {
 // Number of views in a flipbook
 
 function numberOfViews(book) {
-	return book.turn('pages') / 2 + 1;
+	return book.turn('display') == 'single' ? book.turn('pages') : book.turn('pages') / 2 + 1;
 }
 
 // Current view in a flipbook
 
 function getViewNumber(book, page) {
-	return parseInt((page || book.turn('page')) / 2 + 1, 10);
+	var currentPage = page || book.turn('page');
+	return book.turn('display') == 'single' ? currentPage : parseInt(currentPage / 2 + 1, 10);
 }
 
 function moveBar(yes) {

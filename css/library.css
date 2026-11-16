@@ -9,6 +9,10 @@
 	box-sizing: border-box;
 }
 
+body {
+	margin: 0;
+}
+
 body.library-mode {
 	overflow: auto;
 	min-height: 100vh;
@@ -167,6 +171,14 @@ body.library-mode {
 	font-size: 11px;
 }
 
+.reader-controls .zoom-icon {
+	position: static;
+	flex: 0 0 22px;
+	border: 0;
+	padding: 0;
+	background-color: transparent;
+}
+
 .volume-picker {
 	display: flex;
 	align-items: center;
@@ -191,10 +203,17 @@ body.library-mode {
 }
 
 .reader-canvas .magazine-viewport {
-	position: absolute;
-	inset: 0;
+	position: relative;
 	width: 100%;
-	height: 100%;
+	height: auto;
+}
+
+.reader-canvas > .bottom {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 24px;
 }
 
 .reader-canvas .turnjs-slider {
@@ -235,6 +254,10 @@ body.library-mode {
 	.reader-controls {
 		gap: 8px;
 		padding: 7px 10px;
+	}
+
+	.reader-heading strong {
+		max-width: 30vw;
 	}
 
 	.reader-canvas {
